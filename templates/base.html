@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flask Notes</title>
+</head>
+
+<body>
+  <!-- the entire page -->
+  <div class="container">
+    <h1>
+      {% block title %}
+      {% endblock %}
+    </h1>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <div id="flashed-messages-container">
+      {% for message in messages %}
+      <div class="alert alert-info" role="alert">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% block content %}
+    {% endblock %}
+
+  </div>
+</body>
+
+</html>
