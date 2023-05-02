@@ -17,6 +17,7 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
+# TODO: 
 
 class User(db.Model):
     """User model."""
