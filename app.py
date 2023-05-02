@@ -110,7 +110,9 @@ def display_user_info(username):
 
     form = CSRFProtectForm()
     user = User.query.get_or_404(username)
-    return render_template("user.html", user=user, form=form)
+
+
+    return render_template("user.html", user=user, form=form, notes=user.notes)
 
 @app.post("/logout")
 def logout():
@@ -124,3 +126,33 @@ def logout():
         session.pop("username", None)
 
     return redirect("/")
+
+@app.post("/users/<username>/delete")
+def delete_user(username):
+    """delete user """
+
+    s_user = session.get("username")
+
+    if not s_user:
+        flash("You must be log in to delete user.")
+        return redirect("/login")
+
+    # trying to delete other users
+    elif s_user != username:
+        flash("You can't delete others.")
+        return redirect(f"/users/{s_user}")
+
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+
+        flash("Deleted user")
+        session.pop("username", None)
+
+        user = User.query.get_or_404(username)
+
+        db.session.delete(user)
+        db.session.commit()
+
+    return redirect("/")
+

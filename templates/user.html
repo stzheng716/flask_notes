@@ -8,12 +8,23 @@
 
 <h2>Notes</h2>
 <ul>
-    <li>Notes go here!</li>
+    {% for note in notes %}
+
+    <li><a href="/notes/{{note.id}}/update">Edit</a>
+        <a href="/notes/{{note.id}}/delete">Delete</a>
+        <a href="/notes/{{note.id}}">{{note.title}} {{note.content}}</a>
+    </li>
+    {% endfor %}
 </ul>
 
 <form action="/logout" method="POST">
     {{form.hidden_tag()}}
     <button type="submit">Logout</button>
+</form>
+
+<form action="/users/{{user.username}}/delete" method="POST">
+    {{form.hidden_tag()}}
+    <button type="submit">Delete User</button>
 </form>
 
 
