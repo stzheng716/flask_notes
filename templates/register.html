@@ -1,27 +1,7 @@
-{% extends 'base.html' %}
+{% extends 'form_base.html' %}
 
-{% block title %} Pets for Adoption! {% endblock %}
+{% block title %}Register New User{% endblock %}
 
-{% block content %}
+{% block form_id %}register-form{% endblock %}
 
-<form id="edit-pet" method="POST">
-    {{ form.hidden_tag() }} <!--add type=hidden form fields -->
-  
-    {% for field in form
-           if field.widget.input_type != 'hidden' %}
-  
-      <p>
-        {{ field.label }}
-        {{ field }}
-  
-        {% for error in field.errors %}
-          {{ error }}
-        {% endfor %}
-      </p>
-  
-    {% endfor %}
-  
-    <button type="submit">Edit Pet</button>
-  </form>
-
-{% endblock %}
+{% block submit_btn_text %}Register{% endblock %}

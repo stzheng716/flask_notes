@@ -9,15 +9,25 @@ class RegisterForm(FlaskForm):
 
     username = StringField("Username", validators=[
                            InputRequired(), Length(max=20)])
-    
-    password = PasswordField("password", validators=[
+
+    password = PasswordField("Password", validators=[
                              InputRequired(), Length(max=100)])
-    
+
     email = StringField("Email", validators=[
                         InputRequired(), Email(), Length(max=50)])
-    
+
     first_name = StringField("First name", validators=[
                              InputRequired(), Length(max=30)])
-    
-    last_name = StringField("last name", validators=[
+
+    last_name = StringField("Last name", validators=[
                             InputRequired(), Length(max=50)])
+
+
+class LoginForm(FlaskForm):
+    """Form for authenticating a user."""
+
+    username = StringField("Username", validators=[
+                           InputRequired(), Length(max=20)])
+
+    password = PasswordField("Password", validators=[
+                             InputRequired(), Length(max=100)])
