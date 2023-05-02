@@ -7,7 +7,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, User
 
-from forms import RegisterForm, LoginForm
+from forms import RegisterForm, LoginForm, CSRFProtectForm
 
 app = Flask(__name__)
 
@@ -93,6 +93,7 @@ def display_user_info(username):
 
     s_user = session.get("username")
 
+    form = CSRFProtectForm()
     # not logged in
     if not s_user:
         flash("You must be logged in to view that page.")
@@ -104,4 +105,17 @@ def display_user_info(username):
         return redirect(f"/users/{s_user}")
 
     user = User.query.get_or_404(username)
-    return render_template("user.html", user=user)
+    return render_template("user.html", user=user, form=form)
+
+@app.post("/logout")
+def logout():
+    """log users out and redirects to / """
+
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit():
+
+        flash("Logged out")
+        session.pop("username", None)
+
+    return redirect("/")
