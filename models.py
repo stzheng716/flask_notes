@@ -17,7 +17,6 @@ def connect_db(app):
     db.app = app
     db.init_app(app)
 
-# TODO: 
 
 class User(db.Model):
     """User model."""
@@ -41,8 +40,13 @@ class User(db.Model):
         hashed = bcrypt.generate_password_hash(password).decode('utf8')
 
         # return instance of user w/username and hashed pwd
-        return cls(username=username, password=hashed, email=email,
-                   first_name=first_name, last_name=last_name)
+        return cls(
+            username=username, 
+            password=hashed, 
+            email=email,
+            first_name=first_name, 
+            last_name=last_name
+        )
 
 
     @classmethod

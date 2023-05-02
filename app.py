@@ -35,6 +35,8 @@ def register():
     """render the register form, if registration is successful,
     redirect to their user page"""
 
+    # TODO: guard statement to go to user page
+
     form = RegisterForm()
 
     if form.validate_on_submit():
@@ -54,6 +56,8 @@ def register():
                                  first_name=first_name,
                                  last_name=last_name)
 
+        # TODO: do a try catch 
+        
         db.session.add(new_user)
         db.session.commit()
 
@@ -75,8 +79,9 @@ def login():
         username = form.username.data
         password = form.password.data
 
-        user = User.authenticate(username=username,
-                                 password=password)
+        user = User.authenticate(
+            username=username,
+            password=password)
 
         if user:
             session["username"] = user.username
@@ -93,7 +98,6 @@ def display_user_info(username):
 
     s_user = session.get("username")
 
-    form = CSRFProtectForm()
     # not logged in
     if not s_user:
         flash("You must be logged in to view that page.")
@@ -104,6 +108,7 @@ def display_user_info(username):
         flash("You don't have access to that page.")
         return redirect(f"/users/{s_user}")
 
+    form = CSRFProtectForm()
     user = User.query.get_or_404(username)
     return render_template("user.html", user=user, form=form)
 
