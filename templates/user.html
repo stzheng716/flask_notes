@@ -11,11 +11,16 @@
     {% for note in notes %}
 
     <li><a href="/notes/{{note.id}}/update">Edit</a>
-        <a href="/notes/{{note.id}}/delete">Delete</a>
+        <form action="/notes/{{note.id}}/delete" method="POST" style="display: inline-block">
+            {{form.hidden_tag()}}
+            <button type="submit">Delete</button>
+        </form>
         <a href="/notes/{{note.id}}">{{note.title}} {{note.content}}</a>
     </li>
     {% endfor %}
 </ul>
+
+<a href="/users/{{user.username}}/notes/add">Add Note</a>
 
 <form action="/logout" method="POST">
     {{form.hidden_tag()}}
