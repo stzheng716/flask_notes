@@ -4,16 +4,15 @@ import os
 
 from flask import Flask, render_template, flash, redirect, session
 from flask_debugtoolbar import DebugToolbarExtension
-# from flask_sqlalchemy.exc import IntegrityError
-from sqlalchemy.exc import IntegrityError
+
 
 from models import db, connect_db, User, Note
 
-from forms import RegisterForm, LoginForm, CSRFProtectForm, AddEditNoteForm
+from forms import RegisterForm, LoginForm, CSRFProtectForm, AddNoteForm, EditNoteForm
 
 app = Flask(__name__)
 
-#FIXME: global const for session/username key
+SESSION_USER = "username"
 
 app.config["SECRET_KEY"] = "secret"
 
@@ -38,7 +37,7 @@ def register():
     """render the register form, if registration is successful,
     redirect to their user page"""
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
 
     # already logged in
     if s_username:
@@ -73,7 +72,7 @@ def register():
             form.email.errors = ["Email taken"]
             return render_template("register.html", form=form)
 
-        session["username"] = new_user.username
+        session[SESSION_USER] = new_user.username
 
         return redirect(f"/users/{username}")
 
@@ -85,7 +84,7 @@ def login():
     """render the login form, if login is successful,
     redirect to their user page"""
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
 
     # already logged in
     if s_username:
@@ -103,7 +102,7 @@ def login():
             password=password)
 
         if user:
-            session["username"] = user.username
+            session[SESSION_USER] = user.username
             return redirect(f"/users/{username}")
         else:
             form.username.errors = ["Invalid username or password"]
@@ -115,7 +114,7 @@ def display_user_info(username):
     """Requires authentication. Displays all user info for
     this user (except for the password)"""
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
 
     # not logged in
     if not s_username:
@@ -142,7 +141,7 @@ def logout():
     if form.validate_on_submit():
 
         flash("Logged out")
-        session.pop("username", None)
+        session.pop(SESSION_USER, None)
 
     return redirect("/")
 
@@ -150,7 +149,7 @@ def logout():
 def delete_user(username):
     """delete user """
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
 
     if not s_username:
         flash("You must be log in to delete user.")
@@ -165,15 +164,18 @@ def delete_user(username):
 
     if form.validate_on_submit():
 
-        #FIXME: handle notes for this user
-
         user = User.query.get_or_404(username)
+
+        notes = user.notes
+
+        for note in notes:
+            db.session.delete(note)
 
         db.session.delete(user)
         db.session.commit()
 
         flash("Deleted user")
-        session.pop("username", None)
+        session.pop(SESSION_USER, None)
 
     return redirect("/")
 
@@ -185,16 +187,19 @@ def display_note(note_id):
     Displays the note title and content given its id.
     """
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
+
+    note = Note.query.get_or_404(note_id)
 
     # not logged in
     if not s_username:
         flash("You must log in to view notes.")
         return redirect(f"/login")
 
-    #FIXME: authorization
-
-    note = Note.query.get_or_404(note_id)
+    # viewing other user's notes
+    elif s_username != note.owner_username:
+        flash("You can't view others notes.")
+        return redirect(f"/users/{s_username}")
 
     return render_template("note.html", note=note)
 
@@ -206,7 +211,7 @@ def add_note(username):
     POST: add the note and redirect to /users/<username>
     """
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
 
     # not logged in
     if not s_username:
@@ -217,7 +222,7 @@ def add_note(username):
         flash("You don't have permission to do that.")
         return redirect(f"/users/{s_username}")
 
-    form = AddEditNoteForm()
+    form = AddNoteForm()
 
     if form.validate_on_submit():
         title = form.title.data
@@ -241,18 +246,21 @@ def update_note(note_id):
     POST: update the note and redirect to /users/<username>
     """
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
+
+    note = Note.query.get_or_404(note_id)
 
     # not logged in
     if not s_username:
         flash("You must log in to update a note.")
         return redirect(f"/login")
 
-    #FIXME: authorization
+    elif s_username != note.owner_username:
+        flash("You can't view others notes.")
+        return redirect(f"/users/{s_username}")
 
-    note = Note.query.get_or_404(note_id)
 
-    form = AddEditNoteForm(obj=note)
+    form = EditNoteForm(obj=note)
 
     if form.validate_on_submit():
         note.title = form.title.data
@@ -272,21 +280,23 @@ def delete_note(note_id):
     Deletes the note and redirects to /users/<username>
     """
 
-    s_username = session.get("username")
+    s_username = session.get(SESSION_USER)
+
+    note = Note.query.get_or_404(note_id)
 
     # not logged in
     if not s_username:
         flash("You must log in to delete a note.")
         return redirect(f"/login")
-
-    #FIXME: authorization
+    
+    elif s_username != note.owner_username:
+        flash("You can't delete others notes.")
+        return redirect(f"/users/{s_username}")
 
     form = CSRFProtectForm()
 
     if form.validate_on_submit():
         flash("Note deleted!")
-
-        note = Note.query.get_or_404(note_id)
 
         db.session.delete(note)
         db.session.commit()

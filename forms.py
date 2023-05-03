@@ -32,9 +32,14 @@ class LoginForm(FlaskForm):
     password = PasswordField("Password", validators=[
                              InputRequired(), Length(max=100)])
 
-#FIXME: add edit form
+class AddNoteForm(FlaskForm):
+    """Form for adding a new note."""
 
-class AddEditNoteForm(FlaskForm):
+    title = StringField("Title", validators=[InputRequired(), Length(max=100)])
+
+    content = TextAreaField("Content", validators=[InputRequired()])
+
+class EditNoteForm(FlaskForm):
     """Form for adding a new note."""
 
     title = StringField("Title", validators=[InputRequired(), Length(max=100)])

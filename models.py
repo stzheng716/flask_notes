@@ -64,15 +64,14 @@ class User(db.Model):
 
 
 class Note(db.Model):
-    #TODO: docstring???
+    """Notes."""
     __tablename__ = "notes"
 
-    #FIXME: defaults
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(100), nullable=False, default="")
 
-    content = db.Column(db.Text, nullable=False)
+    content = db.Column(db.Text, nullable=False, default="")
 
     owner_username = db.Column(db.String(20), db.ForeignKey(
         "users.username"), nullable=False)
